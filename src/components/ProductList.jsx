@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Product from "./Product";
 
 const productsPerPage = 10;
 
@@ -6,7 +7,6 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-
   const loaderRef = useRef(null);
 
   useEffect(() => {
@@ -17,7 +17,13 @@ const ProductList = () => {
         }`
       );
       const data = await response.json();
-      console.log("data is working", data);
+
+      if (data.products.length === 0) {
+        setHasMore(false);
+      } else {
+        setProducts((prevProducts) => [...prevProducts, ...data.products]);
+      }
+      setPage((prevPage) => prevPage + 1);
     };
 
     const onIntersection = (items) => {
@@ -44,8 +50,18 @@ const ProductList = () => {
     <div>
       <div>ProductList</div>
 
-      {/* product list witll be loaded */}
-      <div ref={loaderRef}>Loading more products...</div>
+      {products.map((product) => (
+        <Product
+          key={product?.id}
+          title={product?.title}
+          description={product?.description}
+          category={product?.category}
+          price={product?.price}
+          images={product?.images}
+        />
+      ))}
+
+      {hasMore && <div ref={loaderRef}>Loading more products...</div>}
     </div>
   );
 };
